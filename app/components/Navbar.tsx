@@ -1,6 +1,6 @@
 'use client';
 
-import Logo from '@img/logos-solana/dark-explorer-logo.svg';
+import Logo from '@img/logos-eclipse/Eclipse_LogoType_White.svg';
 import { useClusterPath } from '@utils/url';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ export function Navbar() {
         <nav className="navbar navbar-expand-md navbar-light">
             <div className="container">
                 <Link href={homePath}>
-                    <Image alt="Solana Explorer" height={22} src={Logo} width={250} />
+                    <Image alt="Eclipse Explorer" height={45} src={Logo} width={200} />
                 </Link>
 
                 <button className="navbar-toggler" type="button" onClick={() => setCollapse(value => !value)}>
