@@ -21,7 +21,7 @@ export function Navbar() {
         <nav className="navbar navbar-expand-md navbar-light">
             <div className="container">
                 <Link href={homePath}>
-                    <Image alt="Solana Explorer" height={22} src={Logo} width={250} />
+                    <Image alt="Eclipse Explorer" height={22} src={Logo} width={250} />
                 </Link>
 
                 <button className="navbar-toggler" type="button" onClick={() => setCollapse(value => !value)}>
@@ -36,14 +36,6 @@ export function Navbar() {
                                 href={homePath}
                             >
                                 Cluster Stats
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
-                                className={`nav-link${selectedLayoutSegment === 'supply' ? ' active' : ''}`}
-                                href={supplyPath}
-                            >
-                                Supply
                             </Link>
                         </li>
                         <li className="nav-item">
