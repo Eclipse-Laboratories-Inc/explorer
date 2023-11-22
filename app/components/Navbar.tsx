@@ -40,14 +40,6 @@ export function Navbar() {
                         </li>
                         <li className="nav-item">
                             <Link
-                                className={`nav-link${selectedLayoutSegment === 'supply' ? ' active' : ''}`}
-                                href={supplyPath}
-                            >
-                                Supply
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link
                                 className={`nav-link${
                                     selectedLayoutSegments[0] === 'tx' && selectedLayoutSegments[1] === '(inspector)'
                                         ? ' active'
