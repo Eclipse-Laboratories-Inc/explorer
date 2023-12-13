@@ -11,7 +11,7 @@ export enum Cluster {
     Custom,
 }
 
-export const CLUSTERS = [Cluster.Devnet, Cluster.Custom];
+export const CLUSTERS = [Cluster.Devnet, Cluster.Testnet, Cluster.Custom];
 
 export function clusterSlug(cluster: Cluster): string {
     switch (cluster) {
@@ -40,7 +40,7 @@ export function clusterName(cluster: Cluster): string {
 }
 
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
-export const TESTNET_URL = 'https://api.testnet.solana.com';
+export const TESTNET_URL = 'https://testnet.dev2.eclipsenetwork.xyz';
 export const DEVNET_URL = 'https://staging-rpc.dev.eclipsenetwork.xyz';
 
 export function clusterUrl(cluster: Cluster, customUrl: string): string {
