@@ -24,6 +24,7 @@ export enum PROGRAM_NAMES {
     STAKE_POOL = 'Stake Pool Program',
     SWAP = 'Swap Program',
     TOKEN = 'Token Program',
+    TOKEN_2022 = 'Token-2022 Program',
     TOKEN_METADATA = 'Token Metadata Program',
     TOKEN_VAULT = 'Token Vault Program',
 
@@ -342,6 +343,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.TOKEN,
+    },
+    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: {
+        deployments: ALL_CLUSTERS,
+        name: PROGRAM_NAMES.TOKEN_2022,
     },
     Vote111111111111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
