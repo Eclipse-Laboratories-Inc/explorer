@@ -41,7 +41,7 @@ export function clusterName(cluster: Cluster): string {
 
 export const MAINNET_BETA_URL = 'https://api.mainnet-beta.solana.com';
 export const TESTNET_URL = 'https://testnet.dev2.eclipsenetwork.xyz';
-export const DEVNET_URL = 'https://staging-rpc.dev.eclipsenetwork.xyz';
+export const DEVNET_URL = 'https://staging-rpc.dev2.eclipsenetwork.xyz';
 
 export function clusterUrl(cluster: Cluster, customUrl: string): string {
     const modifyUrl = (url: string): string => {
