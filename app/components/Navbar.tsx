@@ -1,6 +1,6 @@
 'use client';
 
-import Logo from '@img/logos-eclipse/Eclipse_LogoType_White.svg';
+import Logo from '@img/logos-eclipse/Eclipse_logo_lockup_white.svg';
 import { useClusterPath } from '@utils/url';
 import Image from 'next/image';
 import Link from 'next/link';
