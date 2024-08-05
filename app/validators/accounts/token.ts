@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 
-import { TokenExtension } from '@validators/accounts/token-extension';
 import { PublicKeyFromString } from '@validators/pubkey';
 import { any, array, boolean, enums, Infer, nullable, number, optional, string, type } from 'superstruct';
 
@@ -21,7 +20,6 @@ export const TokenAccountInfo = type({
     closeAuthority: optional(PublicKeyFromString),
     delegate: optional(PublicKeyFromString),
     delegatedAmount: optional(TokenAmount),
-    extensions: optional(array(TokenExtension)),
     isNative: boolean(),
     mint: PublicKeyFromString,
     owner: PublicKeyFromString,
@@ -33,7 +31,6 @@ export const TokenAccountInfo = type({
 export type MintAccountInfo = Infer<typeof MintAccountInfo>;
 export const MintAccountInfo = type({
     decimals: number(),
-    extensions: optional(array(TokenExtension)),
     freezeAuthority: nullable(PublicKeyFromString),
     isInitialized: boolean(),
     mintAuthority: nullable(PublicKeyFromString),

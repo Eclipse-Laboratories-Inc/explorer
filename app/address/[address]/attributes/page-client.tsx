@@ -2,7 +2,6 @@
 
 import { MetaplexNFTAttributesCard } from '@components/account/MetaplexNFTAttributesCard';
 import { ParsedAccountRenderer } from '@components/account/ParsedAccountRenderer';
-import { isTokenProgramData } from '@providers/accounts';
 import React from 'react';
 
 type Props = Readonly<{
@@ -16,7 +15,7 @@ function MetaplexNFTAttributesCardRenderer({
     onNotFound,
 }: React.ComponentProps<React.ComponentProps<typeof ParsedAccountRenderer>['renderComponent']>) {
     const parsedData = account?.data?.parsed;
-    if (!parsedData || !isTokenProgramData(parsedData) || parsedData.parsed.type !== 'mint' || !parsedData.nftData) {
+    if (!parsedData || parsedData.program !== 'spl-token' || parsedData.parsed.type !== 'mint' || !parsedData.nftData) {
         return onNotFound();
     }
     return <MetaplexNFTAttributesCard nftData={parsedData.nftData} />;

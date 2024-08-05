@@ -5,14 +5,13 @@ import {
     parseTokenLendingInstructionTitle,
 } from '@components/instruction/token-lending/types';
 import { isTokenSwapInstruction, parseTokenSwapInstructionTitle } from '@components/instruction/token-swap/types';
-import { isTokenProgramId } from '@providers/accounts/tokens';
+import { TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import {
     ConfirmedSignatureInfo,
     ParsedInstruction,
     ParsedTransactionWithMeta,
     PartiallyDecodedInstruction,
 } from '@solana/web3.js';
-import { isTokenProgram } from '@utils/programs';
 import { intoTransactionInstruction } from '@utils/tx';
 import { ParsedInfo } from '@validators/index';
 import { create } from 'superstruct';
@@ -83,7 +82,7 @@ export function getTokenInstructionName(
     }
 
     if ('parsed' in ix) {
-        if (isTokenProgram(ix.program)) {
+        if (ix.program === 'spl-token') {
             return getTokenProgramInstructionName(ix, signatureInfo);
         } else {
             return undefined;
@@ -105,7 +104,7 @@ export function getTokenInstructionName(
         }
     }
 
-    if (ix.accounts.findIndex(account => isTokenProgramId(account)) >= 0) {
+    if (ix.accounts.findIndex(account => account.equals(TOKEN_PROGRAM_ID)) >= 0) {
         name = 'Unknown (Inner)';
     } else {
         return undefined;

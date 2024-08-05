@@ -1,7 +1,6 @@
 import { ProgramLogsCardBody } from '@components/ProgramLogsCardBody';
-import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@providers/accounts/tokens';
 import { useCluster } from '@providers/cluster';
-import { AccountLayout, MintLayout } from "@solana/spl-token";
+import { AccountLayout, MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { AccountInfo, AddressLookupTableAccount, Connection, MessageAddressTableLookup, ParsedAccountData, ParsedMessageAccount, SimulatedTransactionAccountInfo, TokenBalance, VersionedMessage, VersionedTransaction } from '@solana/web3.js';
 import { PublicKey } from '@solana/web3.js';
 import { InstructionLogs, parseProgramLogs } from '@utils/program-logs';
@@ -141,9 +140,9 @@ function useSimulator(message: VersionedMessage) {
                     const accountOwnerPost = resp.value.accounts?.at(index)?.owner;
 
                     if (
-                        parsedAccountPre &&
-                        isTokenProgramBase58(parsedAccountPre.owner.toBase58()) &&
-                        (parsedAccountPre.data as ParsedAccountData).parsed.type === 'account'
+                        (parsedAccountPre?.owner.toBase58() == TOKEN_PROGRAM_ID.toBase58() ||
+                        parsedAccountPre?.owner.toBase58() == "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb") &&
+                        (parsedAccountPre?.data as ParsedAccountData).parsed.type === 'account'
                     ) {
                         const mint = (parsedAccountPre?.data as ParsedAccountData).parsed.info.mint;
                         const owner = (parsedAccountPre?.data as ParsedAccountData).parsed.info.owner;
@@ -158,8 +157,8 @@ function useSimulator(message: VersionedMessage) {
                     }
 
                     if (
-                        accountOwnerPost &&
-                        isTokenProgramBase58(accountOwnerPost) &&
+                        (accountOwnerPost === TOKEN_PROGRAM_ID.toBase58() ||
+                        accountOwnerPost === "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb") &&
                         Buffer.from(accountDataPost!, 'base64').length >= 165
                     ) {
                         const accountParsedPost = AccountLayout.decode(Buffer.from(accountDataPost!, 'base64'));
@@ -236,10 +235,6 @@ function useSimulator(message: VersionedMessage) {
     };
 }
 
-function isTokenProgramBase58(programIdBase58: string): boolean {
-    return programIdBase58 === TOKEN_PROGRAM_ID.toBase58() || programIdBase58 === TOKEN_2022_PROGRAM_ID.toBase58();
-}
-
 function getMintDecimals(
     accountKeys: PublicKey[],
     parsedAccountsPre: (AccountInfo<ParsedAccountData | Buffer> | null)[],
@@ -254,9 +249,8 @@ function getMintDecimals(
 
         // Token account before
         if (
-            parsedAccount &&
-            isTokenProgramBase58(parsedAccount.owner.toBase58()) &&
-            (parsedAccount.data as ParsedAccountData).parsed.type === 'account'
+            parsedAccount?.owner.toBase58() == TOKEN_PROGRAM_ID.toBase58() &&
+            (parsedAccount?.data as ParsedAccountData).parsed.type === 'account'
         ) {
             mintToDecimals[(parsedAccount?.data as ParsedAccountData).parsed.info.mint] = (
                 parsedAccount?.data as ParsedAccountData
@@ -264,8 +258,7 @@ function getMintDecimals(
         }
         // Mint account before
         if (
-            parsedAccount &&
-            isTokenProgramBase58(parsedAccount.owner.toBase58()) &&
+            parsedAccount?.owner.toBase58() == TOKEN_PROGRAM_ID.toBase58() &&
             (parsedAccount?.data as ParsedAccountData).parsed.type === 'mint'
         ) {
             mintToDecimals[key.toBase58()] = (parsedAccount?.data as ParsedAccountData).parsed.info.decimals;
@@ -274,7 +267,7 @@ function getMintDecimals(
         // Token account after
         const accountDataPost = accountDatasPost.at(index)?.data[0];
         const accountOwnerPost = accountDatasPost.at(index)?.owner;
-        if (accountOwnerPost && isTokenProgramBase58(accountOwnerPost) && Buffer.from(accountDataPost!, 'base64').length === 82) {
+        if (accountOwnerPost === TOKEN_PROGRAM_ID.toBase58() && Buffer.from(accountDataPost!, 'base64').length === 82) {
             const accountParsedPost = MintLayout.decode(Buffer.from(accountDataPost!, 'base64'));
             mintToDecimals[key.toBase58()] = accountParsedPost.decimals;
         }

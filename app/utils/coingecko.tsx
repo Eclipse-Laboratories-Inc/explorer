@@ -1,9 +1,6 @@
 import React from 'react';
 import useTabVisibility from 'use-tab-visibility';
 
-import { useCluster } from '../providers/cluster';
-import { Cluster } from './cluster';
-
 const PRICE_REFRESH = 10000;
 
 export enum CoingeckoStatus {
@@ -46,7 +43,6 @@ export type CoinGeckoResult = {
 };
 
 export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
-    const { cluster } = useCluster()
     const [coinInfo, setCoinInfo] = React.useState<CoinGeckoResult>();
     const { visible: isTabVisible } = useTabVisibility();
     React.useEffect(() => {
@@ -54,9 +50,6 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
             return;
         }
         if (!isTabVisible) {
-            return;
-        }
-        if (cluster !== Cluster.MainnetBeta) {
             return;
         }
         let interval: NodeJS.Timeout | undefined;
@@ -71,14 +64,14 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
                 try {
                     const response = await fetch(
                         `https://api.coingecko.com/api/v3/coins/${coinId}?` +
-                        [
-                            'community_data=false',
-                            'developer_data=false',
-                            'localization=false',
-                            'market_data=true',
-                            'sparkline=false',
-                            'tickers=false',
-                        ].join('&')
+                            [
+                                'community_data=false',
+                                'developer_data=false',
+                                'localization=false',
+                                'market_data=true',
+                                'sparkline=false',
+                                'tickers=false',
+                            ].join('&')
                     );
                     if (stale) {
                         return;
@@ -113,7 +106,7 @@ export function useCoinGecko(coinId?: string): CoinGeckoResult | undefined {
             }
             stale = true;
         };
-    }, [coinId, isTabVisible, cluster]);
+    }, [coinId, isTabVisible]);
 
     return coinInfo;
 }
