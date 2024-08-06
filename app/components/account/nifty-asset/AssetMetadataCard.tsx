@@ -18,11 +18,11 @@ export function NiftyAssetMetadataCard({ asset }: { asset: Asset }) {
         }
     }
 
-    if (metadata?.uri) {
-        React.useEffect(() => {
+    React.useEffect(() => {
+        if (metadata?.uri) {
             fetchMetadataImage(metadata.uri);
-        }, []); // eslint-disable-line react-hooks/exhaustive-deps
-    }
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps    
 
     return (
         <>
