@@ -20,26 +20,6 @@ export const hasDomainSyntax = (value: string) => {
     return value.length > 3 && value.split('.').length === 2;
 };
 
-// returns non empty wallet string if a given .sol domain is owned by a wallet
-export async function getDomainInfo(domain: string, connection: Connection) {
-    const domainKey = await getDomainKey(
-        domain.slice(0, -4), // remove .sol
-        undefined,
-        SOL_TLD_AUTHORITY
-    );
-    try {
-        const registry = await getNameOwner(connection, domainKey);
-        return registry && registry.registry.owner
-            ? {
-                  address: domainKey.toString(),
-                  owner: registry.registry.owner.toString(),
-              }
-            : null;
-    } catch {
-        return null;
-    }
-}
-
 // returns owner address and name account address.
 export async function getANSDomainInfo(domainTld: string, connection: Connection) {
     const derivedDomainKey = await getANSDomainKey(domainTld.toLowerCase());

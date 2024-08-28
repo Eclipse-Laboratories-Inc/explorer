@@ -58,6 +58,8 @@ export function SearchBar() {
         const domainOptions =
             hasDomainSyntax(search) && cluster === Cluster.MainnetBeta ? (await buildDomainOptions(search)) ?? [] : [];
 
+        // console.log('domainOptions', domainOptions)
+
         return [...localOptions, ...tokenOptionsAppendable, ...domainOptions];
     }
 
