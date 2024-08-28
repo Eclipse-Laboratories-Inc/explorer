@@ -82,6 +82,9 @@
         "jest-environment-jsdom": "29.5.0",
         "sass": "^1.53.0"
     },
+    "engine": {
+        "node": ">=18.7.0"
+    },
     "prettier": "@solana/prettier-config-solana",
     "browserslist": {
         "production": [
