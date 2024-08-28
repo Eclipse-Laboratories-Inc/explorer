@@ -1,8 +1,8 @@
-import { Connection } from '@solana/web3.js';
-import { NextResponse } from 'next/server';
+import { Connection } from "@solana/web3.js";
+import { NextResponse } from "next/server";
 
-import { MAINNET_BETA_URL } from '@/app/utils/cluster';
-import { getANSDomainInfo } from '@/app/utils/domain-info';
+import { MAINNET_BETA_URL } from "@/app/utils/cluster";
+import { getANSDomainInfo } from "@/app/utils/domain-info";
 
 type Params = {
     params: {
@@ -10,7 +10,7 @@ type Params = {
     };
 };
 
-export type FetchedDomainInfo = Awaited<ReturnType<typeof getDomainInfo>>;
+export type FetchedDomainInfo = Awaited<ReturnType<typeof getANSDomainInfo>>;
 
 export async function GET(_request: Request, { params: { domain } }: Params) {
     const connection = new Connection(MAINNET_BETA_URL);
