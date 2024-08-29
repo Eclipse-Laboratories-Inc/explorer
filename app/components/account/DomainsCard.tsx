@@ -7,6 +7,7 @@ import { useUserDomains } from '@utils/name-service';
 import React from 'react';
 
 import { DomainInfo } from '@/app/utils/domain-info';
+
 import { useUserANSDomains } from '../../utils/ans-domains';
 
 export function DomainsCard({ address }: { address: string }) {
