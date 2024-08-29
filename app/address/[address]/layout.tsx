@@ -39,16 +39,21 @@ import { PublicKey } from '@solana/web3.js';
 import { Cluster, ClusterStatus } from '@utils/cluster';
 import { FEATURE_PROGRAM_ID } from '@utils/parseFeatureAccount';
 import { useClusterPath } from '@utils/url';
+import { MetadataPointer, TokenMetadata } from '@validators/accounts/token-extension';
 import Link from 'next/link';
 import { redirect, useSelectedLayoutSegment } from 'next/navigation';
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, Suspense, useMemo } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { create } from 'superstruct';
 import useSWRImmutable from 'swr/immutable';
-import { Base58EncodedAddress } from 'web3js-experimental';
-
+import { Address } from 'web3js-experimental';
 import { NiftyAssetAccountCard } from '@/app/components/account/nifty-asset/AssetAccountCard';
 import { NiftyAssetAccountHeader } from '@/app/components/account/nifty-asset/AssetAccountHeader';
 import { isNiftyAssetAccount } from '@/app/components/account/nifty-asset/types';
+import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/account/CompressedNftCard';
+import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
+import { MintAccountInfo } from '@/app/validators/accounts/token';
 
 const IDENTICON_WIDTH = 64;
 
@@ -275,66 +280,160 @@ function AccountHeader({
     }
 
     if (isToken && !isTokenInfoLoading) {
-        let token;
-        let unverified = false;
-
-        // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
-        if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
-            token = tokenInfo;
-        } else if (parsedData?.nftData) {
-            token = {
-                logoURI: parsedData?.nftData?.json?.image,
-                name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
-            };
-            if (!tokenInfo?.verified) {
-                unverified = true;
-            }
-        } else if (tokenInfo) {
-            token = tokenInfo;
-        }
-
-        return (
-            <div className="row align-items-end">
-                {unverified && (
-                    <div className="alert alert-warning alert-scam" role="alert">
-                        Warning! Token names and logos are not unique. This token may have spoofed its name and logo to
-                        look like another token. Verify the token&apos;s mint address to ensure it is correct.
-                    </div>
-                )}
-                <div className="col-auto">
-                    <div className="avatar avatar-lg header-avatar-top">
-                        {token?.logoURI ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                alt="token logo"
-                                className="avatar-img rounded-circle border border-4 border-body"
-                                height={16}
-                                src={token.logoURI}
-                                width={16}
-                            />
-                        ) : (
-                            <Identicon
-                                address={address}
-                                className="avatar-img rounded-circle border border-body identicon-wrapper"
-                                style={{ width: IDENTICON_WIDTH }}
-                            />
-                        )}
-                    </div>
-                </div>
-
-                <div className="col mb-3 ms-n3 ms-md-n2">
-                    <h6 className="header-pretitle">Token</h6>
-                    <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
-                </div>
-            </div>
-        );
+        return <TokenMintHeader address={address} mintInfo={mintInfo} parsedData={parsedData} tokenInfo={tokenInfo} />;
     }
 
-    return (
+    const fallback = (
         <>
             <h6 className="header-pretitle">Details</h6>
             <h2 className="header-title">Account</h2>
         </>
+    );
+    if (account) {
+        return (
+            <ErrorBoundary fallback={fallback}>
+                <Suspense fallback={fallback}>
+                    <CompressedNftAccountHeader account={account} />
+                </Suspense>
+            </ErrorBoundary>
+        );
+    }
+    return fallback;
+}
+
+function TokenMintHeader({
+    address,
+    tokenInfo,
+    mintInfo,
+    parsedData,
+}: {
+    address: string;
+    tokenInfo?: FullTokenInfo;
+    mintInfo?: MintAccountInfo;
+    parsedData?: TokenProgramData;
+}): JSX.Element {
+    const metadataExtension = mintInfo?.extensions?.find(
+        ({ extension }: { extension: string }) => extension === 'tokenMetadata'
+    );
+    const metadataPointerExtension = mintInfo?.extensions?.find(
+        ({ extension }: { extension: string }) => extension === 'metadataPointer'
+    );
+
+    const defaultCard = useMemo(
+        () => (
+            <TokenMintHeaderCard
+                token={tokenInfo ? tokenInfo : { logoURI: undefined, name: undefined }}
+                address={address}
+                unverified={tokenInfo ? !tokenInfo.verified : false}
+            />
+        ),
+        [address, tokenInfo]
+    );
+
+    if (metadataPointerExtension && metadataExtension) {
+        return (
+            <>
+                <ErrorBoundary fallback={defaultCard}>
+                    <Suspense fallback={defaultCard}>
+                        <Token22MintHeader
+                            address={address}
+                            metadataExtension={metadataExtension as any}
+                            metadataPointerExtension={metadataPointerExtension as any}
+                        />
+                    </Suspense>
+                </ErrorBoundary>
+            </>
+        );
+    }
+    // Fall back to legacy token list when there is stub metadata (blank uri), updatable by default by the mint authority
+    else if (!parsedData?.nftData?.metadata.data.uri && tokenInfo) {
+        return defaultCard;
+    } else if (parsedData?.nftData) {
+        const token = {
+            logoURI: parsedData?.nftData?.json?.image,
+            name: parsedData?.nftData?.json?.name ?? parsedData?.nftData.metadata.data.name,
+        };
+        return <TokenMintHeaderCard token={token} address={address} unverified={!tokenInfo?.verified} />;
+    } else if (tokenInfo) {
+        return defaultCard;
+    }
+    return defaultCard;
+}
+
+function Token22MintHeader({
+    address,
+    metadataExtension,
+    metadataPointerExtension,
+}: {
+    address: string;
+    metadataExtension: { extension: 'tokenMetadata'; state?: any };
+    metadataPointerExtension: { extension: 'metadataPointer'; state?: any };
+}) {
+    const tokenMetadata = create(metadataExtension.state, TokenMetadata);
+    const { metadataAddress } = create(metadataPointerExtension.state, MetadataPointer);
+    const metadata = useMetadataJsonLink(tokenMetadata.uri, { suspense: true });
+
+    if (!metadata) {
+        throw new Error(`Could not load metadata from given URI: ${tokenMetadata.uri}`);
+    }
+
+    // Handles the basic case where MetadataPointer is referencing the Token Metadata extension directly
+    // Does not handle the case where MetadataPointer is pointing at a separate account.
+    if (metadataAddress?.toString() === address) {
+        return (
+            <TokenMintHeaderCard
+                address={address}
+                token={{ logoURI: metadata.image, name: metadata.name }}
+                unverified={false}
+            />
+        );
+    }
+    throw new Error('Metadata loading for non-token 2022 programs is not yet supported');
+}
+
+function TokenMintHeaderCard({
+    address,
+    token,
+    unverified,
+}: {
+    address: string;
+    token: { name?: string | undefined; logoURI?: string | undefined };
+    unverified: boolean;
+}) {
+    return (
+        <div className="row align-items-end">
+            {unverified && (
+                <div className="alert alert-warning alert-scam" role="alert">
+                    Warning! Token names and logos are not unique. This token may have spoofed its name and logo to look
+                    like another token. Verify the token&apos;s mint address to ensure it is correct.
+                </div>
+            )}
+            <div className="col-auto">
+                <div className="avatar avatar-lg header-avatar-top">
+                    {token?.logoURI ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            alt="token logo"
+                            className="avatar-img rounded-circle border border-4 border-body"
+                            height={16}
+                            src={token.logoURI}
+                            width={16}
+                        />
+                    ) : (
+                        <Identicon
+                            address={address}
+                            className="avatar-img rounded-circle border border-body identicon-wrapper"
+                            style={{ width: IDENTICON_WIDTH }}
+                        />
+                    )}
+                </div>
+            </div>
+
+            <div className="col mb-3 ms-n3 ms-md-n2">
+                <h6 className="header-pretitle">Token</h6>
+                <h2 className="header-title">{token?.name || 'Unknown Token'}</h2>
+            </div>
+        </div>
     );
 }
 
@@ -419,12 +518,19 @@ function InfoSection({ account, tokenInfo }: { account: Account; tokenInfo?: Ful
         parsedData.parsed.type === 'lookupTable'
     ) {
         return <AddressLookupTableAccountSection account={account} lookupTableAccount={parsedData.parsed.info} />;
-    } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, rawData)) {
+    } else if (rawData && isAddressLookupTableAccount(account.owner.toBase58() as Address, rawData)) {
         return <AddressLookupTableAccountSection account={account} data={rawData} />;
     } else if (account.owner.toBase58() === FEATURE_PROGRAM_ID) {
         return <FeatureAccountSection account={account} />;
     } else {
-        return <UnknownAccountCard account={account} />;
+        const fallback = <UnknownAccountCard account={account} />;
+        return (
+            <ErrorBoundary fallback={fallback}>
+                <Suspense fallback={fallback}>
+                    <CompressedNftCard account={account} />
+                </Suspense>
+            </ErrorBoundary>
+        );
     }
 }
 
@@ -460,7 +566,8 @@ export type MoreTabs =
     | 'concurrent-merkle-tree'
     | 'nifty-asset-metadata'
     | 'nifty-asset-extensions'
-    | 'nifty-asset-ruleset';
+    | 'nifty-asset-ruleset'
+    | 'compression';
 
 function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX.Element | null)[] }) {
     return (
@@ -480,7 +587,7 @@ function MoreSection({ children, tabs }: { children: React.ReactNode; tabs: (JSX
 function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     const address = pubkey.toBase58();
     const parsedData = account.data.parsed;
-    const tabs: Tab[] = [
+    const tabs: (Tab & { compressed?: boolean })[] = [
         {
             path: '',
             slug: 'history',
@@ -502,10 +609,7 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
     }
 
     // Add the key for address lookup tables
-    if (
-        account.data.raw &&
-        isAddressLookupTableAccount(account.owner.toBase58() as Base58EncodedAddress, account.data.raw)
-    ) {
+    if (account.data.raw && isAddressLookupTableAccount(account.owner.toBase58() as Address, account.data.raw)) {
         tabs.push(...TABS_LOOKUP['address-lookup-table']);
     }
 
@@ -516,6 +620,25 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
         (parsedData as TokenProgramData).nftData
     ) {
         tabs.push(...TABS_LOOKUP[`${programTypeKey}:metaplexNFT`]);
+    }
+
+    // Compressed NFT tabs
+    if ((!account.data.raw || account.data.raw.length === 0) && !account.data.parsed) {
+        tabs.push(
+            {
+                compressed: true,
+                path: 'metadata',
+                slug: 'metadata',
+                title: 'Metadata',
+            },
+            {
+                compressed: true,
+                path: 'attributes',
+                slug: 'attributes',
+                title: 'Attributes',
+            },
+            { compressed: true, path: 'compression', slug: 'compression', title: 'Compression' }
+        );
     }
 
     const isNFToken = account && isNFTokenAccount(account);
@@ -586,7 +709,13 @@ function getTabs(pubkey: PublicKey, account: Account): TabComponent[] {
 
     return tabs.map(tab => {
         return {
-            component: <Tab address={address} key={tab.slug} path={tab.path} title={tab.title} />,
+            component: !tab.compressed ? (
+                <Tab address={address} key={tab.slug} path={tab.path} title={tab.title} />
+            ) : (
+                <React.Suspense key={tab.slug} fallback={<></>}>
+                    <CompressedNftLink tab={tab} address={pubkey.toString()} pubkey={pubkey} />
+                </React.Suspense>
+            ),
             tab,
         };
     });
@@ -615,7 +744,7 @@ function getAnchorTabs(pubkey: PublicKey, account: Account) {
     tabComponents.push({
         component: (
             <React.Suspense key={anchorProgramTab.slug} fallback={<></>}>
-                <AnchorProgramLink tab={anchorProgramTab} address={pubkey.toString()} pubkey={pubkey} />
+                <AnchorProgramIdlLink tab={anchorProgramTab} address={pubkey.toString()} pubkey={pubkey} />
             </React.Suspense>
         ),
         tab: anchorProgramTab,
@@ -638,13 +767,13 @@ function getAnchorTabs(pubkey: PublicKey, account: Account) {
     return tabComponents;
 }
 
-function AnchorProgramLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+function AnchorProgramIdlLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
     const { url } = useCluster();
-    const anchorProgram = useAnchorProgram(pubkey.toString(), url);
+    const { idl } = useAnchorProgram(pubkey.toString(), url);
     const anchorProgramPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
-    if (!anchorProgram) {
+    if (!idl) {
         return null;
     }
 
@@ -659,7 +788,7 @@ function AnchorProgramLink({ tab, address, pubkey }: { tab: Tab; address: string
 
 function AccountDataLink({ address, tab, programId }: { address: string; tab: Tab; programId: PublicKey }) {
     const { url } = useCluster();
-    const accountAnchorProgram = useAnchorProgram(programId.toString(), url);
+    const { program: accountAnchorProgram } = useAnchorProgram(programId.toString(), url);
     const accountDataPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
     const selectedLayoutSegment = useSelectedLayoutSegment();
     const isActive = selectedLayoutSegment === tab.path;
@@ -670,6 +799,28 @@ function AccountDataLink({ address, tab, programId }: { address: string; tab: Ta
     return (
         <li key={tab.slug} className="nav-item">
             <Link className={`${isActive ? 'active ' : ''}nav-link`} href={accountDataPath}>
+                {tab.title}
+            </Link>
+        </li>
+    );
+}
+
+// Checks that a compressed NFT exists at the given address and returns a link to the tab
+function CompressedNftLink({ tab, address, pubkey }: { tab: Tab; address: string; pubkey: PublicKey }) {
+    const { url } = useCluster();
+    const compressedNft = useCompressedNft({ address: pubkey.toString(), url });
+    const tabPath = useClusterPath({ pathname: `/address/${address}/${tab.path}` });
+
+    const selectedLayoutSegment = useSelectedLayoutSegment();
+    const isActive = selectedLayoutSegment === tab.path;
+
+    if (!compressedNft || !compressedNft.compression.compressed) {
+        return null;
+    }
+
+    return (
+        <li key={tab.slug} className="nav-item">
+            <Link className={`${isActive ? 'active ' : ''}nav-link`} href={tabPath}>
                 {tab.title}
             </Link>
         </li>
