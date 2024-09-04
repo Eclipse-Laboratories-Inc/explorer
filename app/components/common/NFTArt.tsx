@@ -67,7 +67,9 @@ const VideoArtContent = ({
                 <Stream
                     src={likelyVideo.replace('https://watch.videodelivery.net/', '')}
                     loop={true}
+                    //@ts-expect-error numbers are fine here
                     height={180}
+                    //@ts-expect-error numbers are fine here
                     width={320}
                     controls={false}
                     style={{ borderRadius: 12 }}

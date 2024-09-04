@@ -8,6 +8,7 @@
 //
 
 // Allow for a text-decoration since links are the same color as the alert text.
+@import '~bootstrap/scss/mixins/_alert.scss';
 
 .alert-link {
     text-decoration: $alert-link-text-decoration;

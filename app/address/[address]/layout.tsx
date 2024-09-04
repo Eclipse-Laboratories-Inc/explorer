@@ -54,6 +54,7 @@ import { CompressedNftAccountHeader, CompressedNftCard } from '@/app/components/
 import { useCompressedNft, useMetadataJsonLink } from '@/app/providers/compressed-nft';
 import { FullTokenInfo, getFullTokenInfo } from '@/app/utils/token-info';
 import { MintAccountInfo } from '@/app/validators/accounts/token';
+import { BareFetcher } from 'swr';
 
 const IDENTICON_WIDTH = 64;
 
@@ -204,7 +205,7 @@ function AddressLayoutInner({ children, params: { address } }: Props) {
         infoStatus === FetchStatus.Fetched && infoParsed && isTokenProgramData(infoParsed) && pubkey
             ? ['get-full-token-info', address, cluster, url]
             : null,
-        fetchFullTokenInfo
+        fetchFullTokenInfo as BareFetcher<FullTokenInfo>
     );
 
     // Fetch account on load
