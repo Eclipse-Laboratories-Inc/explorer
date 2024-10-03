@@ -1,0 +1,23 @@
+
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm i -g pnpm 
+        - corepack enable
+        - pnpm install --frozen-lockfile
+    build:
+      commands:
+        - pnpm run build
+    postBuild:
+      commands:
+      - pwd
+      - ls -al
+  env:
+    variables:
+      node-linker: hoisted
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'

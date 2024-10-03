@@ -28,7 +28,6 @@ export default function Page() {
         <StatsProvider>
             <SupplyProvider>
                 <div className="container mt-4">
-                    <StakingComponent />
                     <div className="card">
                         <div className="card-header">
                             <div className="row align-items-center">

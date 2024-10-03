@@ -10,7 +10,7 @@ import { useState } from 'react';
 
 export const MAX_TIME_LOADING_IMAGE = 5000; /* 5 seconds */
 
-const ErrorPlaceHolder = () => <Image src={ErrorLogo} width={120} height={120} alt="Solana Logo" />;
+const ErrorPlaceHolder = () => <Image src={ErrorLogo} width={120} height={120} alt="Eclipse Logo" />;
 
 const ViewOriginalArtContentLink = ({ src }: { src: string }) => {
     if (!src) {
@@ -67,7 +67,9 @@ const VideoArtContent = ({
                 <Stream
                     src={likelyVideo.replace('https://watch.videodelivery.net/', '')}
                     loop={true}
+                    //@ts-expect-error numbers are fine here
                     height={180}
+                    //@ts-expect-error numbers are fine here
                     width={320}
                     controls={false}
                     style={{ borderRadius: 12 }}

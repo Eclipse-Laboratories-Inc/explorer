@@ -40,7 +40,7 @@ import { BigNumber } from 'bignumber.js';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, RefreshCw } from 'react-feather';
 import { create } from 'superstruct';
-import useSWR from 'swr';
+import useSWR, { BareFetcher } from 'swr';
 
 import { FullLegacyTokenInfo, getTokenInfo, getTokenInfoSwrKey } from '@/app/utils/token-info';
 
@@ -402,7 +402,7 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
     const epoch = clusterInfo?.epochInfo.epoch;
     const label = addressLabel(account.pubkey.toBase58(), cluster);
     const swrKey = useMemo(() => getTokenInfoSwrKey(info.mint.toString(), cluster, url), [cluster, url]);
-    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo);
+    const { data: tokenInfo } = useSWR(swrKey, fetchTokenInfo as BareFetcher<FullLegacyTokenInfo>);
     const [symbol, setSymbol] = useState<string | undefined>(undefined);
     const accountExtensions = info.extensions?.slice();
     accountExtensions?.sort(cmpExtension);
@@ -473,10 +473,10 @@ function TokenAccountCard({ account, info }: { account: Account; info: TokenAcco
                 )}
                 {info.rentExemptReserve && (
                     <tr>
-                        <td>Rent-exempt reserve (SOL)</td>
+                        <td>Rent-exempt reserve (ETH)</td>
                         <td className="text-lg-end">
                             <>
-                                ◎
+                                Ξ
                                 <span className="font-monospace">
                                     {new BigNumber(info.rentExemptReserve.uiAmountString).toFormat(9)}
                                 </span>

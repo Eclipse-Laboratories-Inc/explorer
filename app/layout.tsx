@@ -12,9 +12,14 @@ import { Rubik } from 'next/font/google';
 import { Metadata } from 'next/types';
 
 export const metadata: Metadata = {
-    description: 'Inspect transactions, accounts, blocks, and more on the Solana blockchain',
+    description: 'Inspect transactions, accounts, blocks, and more on the Eclipse blockchain',
     manifest: '/manifest.json',
-    title: 'Explorer | Solana',
+    title: 'Explorer | Eclipse',
+    viewport: {
+        initialScale: 1,
+        maximumScale: 1,
+        width: 'device-width',
+    },
 };
 
 export const viewport: Viewport = {
