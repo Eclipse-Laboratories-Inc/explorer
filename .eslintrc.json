@@ -1,7 +1,10 @@
 {
     "extends": ["next/core-web-vitals", "@solana/eslint-config-solana"],
     "rules": {
-        "@typescript-eslint/no-unused-vars": "off"
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-duplicate-enum-values" : "off",
+        "simple-import-sort/imports": "off"
     },
     "plugins": ["testing-library"],
     "overrides": [

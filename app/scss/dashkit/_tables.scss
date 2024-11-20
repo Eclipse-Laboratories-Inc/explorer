@@ -6,6 +6,7 @@
 //
 // Bootstrap Overrides =====================================
 //
+$dark-gray: #1f2423;
 
 .table thead th {
     background-color: $table-head-bg;
@@ -14,6 +15,11 @@
     font-weight: $font-weight-normal;
     letter-spacing: 0.08em;
     color: $table-head-color;
+}
+
+.table {
+    --bs-table-color: #ffffff;
+    --bs-table-bg: $dark-gray;
 }
 
 .table thead th,

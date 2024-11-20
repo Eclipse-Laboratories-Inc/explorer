@@ -10,8 +10,15 @@ import React, { Fragment, ReactNode, useState } from 'react';
 import { ChevronDown, ChevronUp, CornerDownRight } from 'react-feather';
 import ReactJson from 'react-json-view';
 
+const ANCHOR_SELF_CPI_TAG = Buffer.from('1d9acb512ea545e4', 'hex').reverse();
+const ANCHOR_SELF_CPI_NAME = 'Anchor Self Invocation';
+
+export function instructionIsSelfCPI(ixData: Buffer): boolean {
+    return ixData.slice(0, 8).equals(ANCHOR_SELF_CPI_TAG);
+}
+
 export function getAnchorProgramName(program: Program | null): string | undefined {
-    return program ? snakeToTitleCase(program.idl.name) : undefined;
+    return program && 'name' in program.idl ? snakeToTitleCase(program.idl.name) : undefined;
 }
 
 export function AnchorProgramName({
@@ -23,7 +30,7 @@ export function AnchorProgramName({
     url: string;
     defaultName?: string;
 }) {
-    const program = useAnchorProgram(programId.toString(), url);
+    const { program } = useAnchorProgram(programId.toString(), url);
     const programName = getAnchorProgramName(program) || defaultName;
     return <>{programName}</>;
 }
@@ -38,6 +45,10 @@ export function ProgramName({ programId, cluster, url }: { programId: PublicKey;
 }
 
 export function getAnchorNameForInstruction(ix: TransactionInstruction, program: Program): string | null {
+    if (instructionIsSelfCPI(ix.data)) {
+        return ANCHOR_SELF_CPI_NAME;
+    }
+
     const coder = new BorshInstructionCoder(program.idl);
     const decodedIx = coder.decode(ix.data);
 
