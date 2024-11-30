@@ -100,8 +100,8 @@ const ROWS: TableRow[] = [
         type: DisplayType.Auditors,
     },
     {
-        display: 'Acknowledgements',
-        key: 'acknowledgements',
+        display: 'Acknowledgments',
+        key: 'acknowledgments',
         type: DisplayType.URL,
     },
     {
