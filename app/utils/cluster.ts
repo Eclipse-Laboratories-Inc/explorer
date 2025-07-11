@@ -39,7 +39,7 @@ export function clusterName(cluster: Cluster): string {
     }
 }
 
-export const MAINNET_BETA_URL = 'https://mainnetbeta-archive-rpc.prod.eclipsenetwork.xyz';
+export const MAINNET_BETA_URL = 'https://explorer.eclipserpc.xyz';
 export const TESTNET_URL = 'https://testnet.dev2.eclipsenetwork.xyz';
 export const DEVNET_URL = 'https://devnet.dev2.eclipsenetwork.xyz';
 
