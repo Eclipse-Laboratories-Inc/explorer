@@ -1,6 +1,6 @@
 {
-    "short_name": "Solana Explorer",
-    "name": "Inspect transactions, accounts, blocks, and more on the Solana blockchain",
+    "short_name": "Eclipse Explorer",
+    "name": "Inspect transactions, accounts, blocks, and more on the Eclipse L2",
     "icons": [
         {
             "src": "favicon.ico",

@@ -83,6 +83,9 @@ export enum PROGRAM_NAMES {
     SOLANART_GO = 'Solanart - Global offers',
     STEPN_DEX = 'STEPN Dex',
     OPENBOOK_DEX = 'OpenBook Dex',
+    NIFTY_ASSET = 'Nifty Asset Program',
+    FINTERNET_USER_MANAGER = 'Finternet - User manager',
+    FINTERNET_TOKEN_MANAGER = 'Finternet - Token manager',
 }
 
 const ALL_CLUSTERS = [Cluster.Custom, Cluster.Devnet, Cluster.Testnet, Cluster.MainnetBeta];
@@ -165,6 +168,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
         deployments: [Cluster.MainnetBeta],
         name: PROGRAM_NAMES.SERUM_3,
     },
+    A5JxZVHgXe7fn5TqJXm6Hj2zKh1ptDapae2YjtXbZJoy: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.FINTERNET_TOKEN_MANAGER,
+    },
     // spl
     ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL: {
         deployments: ALL_CLUSTERS,
@@ -174,6 +181,11 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     AddressLookupTab1e1111111111111111111111111: {
         deployments: ALL_CLUSTERS,
         name: PROGRAM_NAMES.ADDRESS_LOOKUP_TABLE,
+    },
+    // nifty asset
+    AssetGtQBTSgm5s91d1RAQod5JmaZiJDxqsgtqrZud73: {
+        deployments: [Cluster.Devnet, Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.NIFTY_ASSET,
     },
     BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg: {
         deployments: [Cluster.MainnetBeta],
@@ -195,6 +207,10 @@ export const PROGRAM_INFO_BY_ID: { [address: string]: ProgramInfo } = {
     CLoCKyJ6DXBJqqu2VWx9RLbgnwwR6BMHHuyasVmfMzBh: {
         deployments: [Cluster.MainnetBeta, Cluster.Devnet],
         name: PROGRAM_NAMES.CLOCKWORK_2,
+    },
+    CmFuqQTLs2nQof5uaktJn1a6k2VdbGmZPfrJufB2Vm3F: {
+        deployments: [Cluster.Devnet,Cluster.MainnetBeta],
+        name: PROGRAM_NAMES.FINTERNET_USER_MANAGER,
     },
     ComputeBudget111111111111111111111111111111: {
         deployments: ALL_CLUSTERS,
@@ -441,19 +457,20 @@ export const SYSVAR_IDS: { [key: string]: string } = {
 };
 
 export const TOKEN_IDS: { [key: string]: string } = {
-  TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
-  TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
+    TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'Token Program',
+    TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'Token-2022 Program',
 } as const;
 
 export type TokenProgram = 'spl-token' | 'spl-token-2022';
 export function assertIsTokenProgram(program: string): asserts program is TokenProgram {
-    if (program !== 'spl-token' && program !== 'spl-token-2022') throw new Error("Expected token program name of `spl-token` or `spl-token-2022`");
+    if (program !== 'spl-token' && program !== 'spl-token-2022')
+        throw new Error('Expected token program name of `spl-token` or `spl-token-2022`');
 }
 export function isTokenProgram(program: string): program is TokenProgram {
     try {
         assertIsTokenProgram(program);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 }
